@@ -2,17 +2,11 @@
 
 module Database where
 
-import           Control.Monad (void)
-import           Control.Monad.Logger (runStdoutLoggingT, MonadLogger, LoggingT,
+import           Control.Monad.Logger (runStdoutLoggingT, LoggingT,
                                        LogLevel(..), filterLogger)
 import           Control.Monad.Reader (runReaderT)
-import           Control.Monad.IO.Class (MonadIO)
-import           Data.ByteString.Char8 (pack, unpack)
 import           Data.Int (Int64)
-import           Data.Maybe (listToMaybe)
-import           Database.Esqueleto (select, from, where_, (^.), val, (==.), on,
-                                     InnerJoin(..), limit, orderBy, desc)
-import           Database.Persist (get, insert, delete, entityVal, selectList, Entity)
+import           Database.Persist (get, insert, delete, selectList, Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn,
                                               runMigration, SqlPersistT)

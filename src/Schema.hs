@@ -13,7 +13,6 @@ module Schema where
 import           Data.Aeson (ToJSON, toJSON, object, (.=), FromJSON, parseJSON, (.:), withObject
                             , Object)
 import           Data.Aeson.Types (Parser, Pair)
-import           Data.Time (UTCTime)
 import           Database.Persist (Entity(..), Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import qualified Database.Persist.TH as PTH
