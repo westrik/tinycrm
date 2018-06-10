@@ -13,6 +13,7 @@ import           Database.Persist.Postgresql (ConnectionString, withPostgresqlCo
 import           System.Environment (lookupEnv)
 
 import           Schema
+import           Logger (logInfo)
 
 type PGInfo = ConnectionString
 
@@ -31,7 +32,9 @@ fetchPostgresConnection = do
   connString <- lookupEnv "CRM_DB"
   case connString of
     Just string -> return (pack string)
-    Nothing -> return localConnString
+    Nothing -> do
+      logInfo "Falling back to local PG config"
+      return localConnString
 
 runAction :: PGInfo -> SqlPersistT (LoggingT IO) a -> IO a
 runAction connectionString action = 
