@@ -14,18 +14,22 @@ import           Servant.API
 import           Servant.Client
 import           Servant.Server
 
-import           Database (fetchUserPG, createUserPG, fetchPostgresConnection, PGInfo)
+import           Database (fetchUserPG, fetchAllUsersPG, createUserPG, fetchPostgresConnection, PGInfo)
 import           Schema
 
 type FullAPI =
-       "users" :> Capture "userid" Int64 :> Get '[JSON] User
+       "users" :> Get '[JSON] [Entity User]
+  :<|> "users" :> Capture "userid" Int64 :> Get '[JSON] User
   :<|> "users" :> ReqBody '[JSON] User :> Post '[JSON] Int64
 
 usersAPI :: Proxy FullAPI
 usersAPI = Proxy :: Proxy FullAPI
 
-fetchUsersHandler :: PGInfo -> Int64 -> Handler User
-fetchUsersHandler pgInfo uid = do
+fetchUsersHandler :: PGInfo -> Handler [Entity User]
+fetchUsersHandler pgInfo = liftIO $ fetchAllUsersPG pgInfo
+
+fetchUserHandler :: PGInfo -> Int64 -> Handler User
+fetchUserHandler pgInfo uid = do
   maybeUser <- liftIO $ fetchUserPG pgInfo uid
   case maybeUser of
     Just user -> return user
@@ -37,6 +41,7 @@ createUserHandler pgInfo user = liftIO $ createUserPG pgInfo user
 fullAPIServer :: PGInfo -> Server FullAPI
 fullAPIServer pgInfo =
   (fetchUsersHandler pgInfo) :<|>
+  (fetchUserHandler pgInfo)  :<|>
   (createUserHandler pgInfo)
 
 runServer :: IO ()
@@ -44,7 +49,9 @@ runServer = do
   pgInfo <- fetchPostgresConnection
   run 8000 (serve usersAPI (fullAPIServer pgInfo))
 
+fetchUsersClient :: ClientM [Entity User]
 fetchUserClient :: Int64 -> ClientM User
 createUserClient :: User -> ClientM Int64
-( fetchUserClient             :<|>
+( fetchUsersClient            :<|>
+  fetchUserClient             :<|>
   createUserClient)  = client (Proxy :: Proxy FullAPI)

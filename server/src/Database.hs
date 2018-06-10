@@ -12,7 +12,7 @@ import           Data.Int (Int64)
 import           Data.Maybe (listToMaybe)
 import           Database.Esqueleto (select, from, where_, (^.), val, (==.), on,
                                      InnerJoin(..), limit, orderBy, desc)
-import           Database.Persist (get, insert, delete, entityVal, Entity)
+import           Database.Persist (get, insert, delete, entityVal, selectList, Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn,
                                               runMigration, SqlPersistT)
@@ -45,6 +45,9 @@ migrateDB connString = runAction connString (runMigration migrateAll)
 
 fetchUserPG :: PGInfo -> Int64 -> IO (Maybe User)
 fetchUserPG connString uid = runAction connString (get (toSqlKey uid))
+
+fetchAllUsersPG :: PGInfo -> IO [Entity User]
+fetchAllUsersPG connString = runAction connString (selectList [] [])
 
 createUserPG :: PGInfo -> User -> IO Int64
 createUserPG connString user = fromSqlKey <$> runAction connString (insert user)
