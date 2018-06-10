@@ -22,4 +22,11 @@ The build is minified and the filenames include the hashes.<br>
 
 ## Server
 
-### `...`
+### `stack build`
+Build migrate-db and tinycrm executables.
+
+### `stack exec migrate-db`
+Run migrations.
+
+### `stack exec tinycrm`
+Run server at `http://localhost:8000`.

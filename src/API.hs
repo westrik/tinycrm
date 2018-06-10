@@ -8,7 +8,7 @@ import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.Except (throwE)
 import           Data.Int (Int64)
 import           Data.Proxy (Proxy(..))
-import           Database.Persist (Key, Entity)
+import           Database.Persist (Entity)
 import           Network.Wai.Handler.Warp (run)
 import           Servant.API
 import           Servant.Client

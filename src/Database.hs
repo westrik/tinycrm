@@ -2,14 +2,13 @@
 
 module Database where
 
-import           Control.Monad.Logger (runStdoutLoggingT, LoggingT,
-                                       LogLevel(..), filterLogger)
+import           Control.Monad.Logger (runStdoutLoggingT, LoggingT, LogLevel(..), filterLogger)
 import           Control.Monad.Reader (runReaderT)
 import           Data.Int (Int64)
 import           Database.Persist (get, insert, delete, selectList, Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn,
-                                              runMigration, SqlPersistT)
+import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn, runMigration, 
+                 SqlPersistT)
 
 import           Schema
 
