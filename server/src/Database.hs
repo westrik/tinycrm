@@ -16,9 +16,6 @@ import           Database.Persist (get, insert, delete, entityVal, Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn,
                                               runMigration, SqlPersistT)
-import           Database.Redis (ConnectInfo, connect, Redis, runRedis, defaultConnectInfo,
-                                 setex, del)
-import qualified Database.Redis as Redis
 
 import           Schema
 
@@ -57,38 +54,3 @@ deleteUserPG connString uid = runAction connString (delete userKey)
   where
     userKey :: Key User
     userKey = toSqlKey uid
-
-fetchArticlePG :: PGInfo -> Int64 -> IO (Maybe Article)
-fetchArticlePG connString aid = runAction connString selectAction
-  where
-    selectAction :: SqlPersistT (LoggingT IO) (Maybe Article)
-    selectAction = ((fmap entityVal) . listToMaybe) <$> (select . from $ \articles -> do
-      where_ (articles ^. ArticleId ==. val (toSqlKey aid))
-      return articles)
-
-fetchArticlesByAuthorPG :: PGInfo -> Int64 -> IO [Entity Article]
-fetchArticlesByAuthorPG connString uid = runAction connString fetchAction
-  where
-    fetchAction :: SqlPersistT (LoggingT IO) [Entity Article]
-    fetchAction = select . from $ \articles -> do
-      where_ (articles ^. ArticleAuthorId ==. val (toSqlKey uid))
-      return articles
-
-fetchRecentArticlesPG :: PGInfo -> IO [(Entity User, Entity Article)]
-fetchRecentArticlesPG connString = runAction connString fetchAction
-  where
-    fetchAction :: SqlPersistT (LoggingT IO) [(Entity User, Entity Article)]
-    fetchAction = select . from $ \(users `InnerJoin` articles) -> do
-      on (users ^. UserId ==. articles ^. ArticleAuthorId)
-      orderBy [desc (articles ^. ArticlePublishedTime)]
-      limit 10
-      return (users, articles)
-
-createArticlePG :: PGInfo -> Article -> IO Int64
-createArticlePG connString article = fromSqlKey <$> runAction connString (insert article)
-
-deleteArticlePG :: PGInfo -> Int64 -> IO ()
-deleteArticlePG connString aid = runAction connString (delete articleKey)
-  where
-    articleKey :: Key Article
-    articleKey = toSqlKey aid
