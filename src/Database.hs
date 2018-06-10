@@ -5,10 +5,12 @@ module Database where
 import           Control.Monad.Logger (runStdoutLoggingT, LoggingT, LogLevel(..), filterLogger)
 import           Control.Monad.Reader (runReaderT)
 import           Data.Int (Int64)
+import           Data.ByteString.Char8 (pack)
 import           Database.Persist (get, insert, delete, selectList, Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn, runMigration, 
                  SqlPersistT)
+import           System.Environment (lookupEnv)
 
 import           Schema
 
@@ -24,9 +26,12 @@ logFilter _ LevelInfo      = True
 logFilter _ LevelDebug     = False
 logFilter _ (LevelOther _) = False
 
--- This is IO since in a real application we'd want to configure it.
 fetchPostgresConnection :: IO PGInfo
-fetchPostgresConnection = return localConnString
+fetchPostgresConnection = do
+  connString <- lookupEnv "CRM_DB"
+  case connString of
+    Just string -> return (pack string)
+    Nothing -> return localConnString
 
 runAction :: PGInfo -> SqlPersistT (LoggingT IO) a -> IO a
 runAction connectionString action = 
