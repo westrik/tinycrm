@@ -1,6 +1,19 @@
-# Tiny CRM
+# TinyCRM
 
 A tiny CRM built with Haskell, React, and Redux.
+
+## Server
+In `crm/`, you can run:
+
+### `stack build`
+Build `migrate-db` and `tinycrm` executables.
+
+### `stack exec migrate-db`
+Run migrations.
+
+### `stack exec tinycrm`
+Run server at `http://localhost:8000`.
+
 
 ## Client
 In `crm/client`, you can run:
@@ -19,14 +32,3 @@ Launches the test runner in the interactive watch mode.<br>
 Builds the app for production to the `build` folder.<br>
 It correctly bundles React in production mode and optimizes the build for the best performance.
 The build is minified and the filenames include the hashes.<br>
-
-## Server
-
-### `stack build`
-Build migrate-db and tinycrm executables.
-
-### `stack exec migrate-db`
-Run migrations.
-
-### `stack exec tinycrm`
-Run server at `http://localhost:8000`.
