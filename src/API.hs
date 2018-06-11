@@ -10,6 +10,7 @@ import           Data.Int (Int64)
 import           Data.Proxy (Proxy(..))
 import           Database.Persist (Entity)
 import           Network.Wai.Handler.Warp (run)
+import           Network.Wai.Middleware.Cors
 import           Servant.API
 import           Servant.Client
 import           Servant.Server
@@ -53,7 +54,10 @@ fullAPIServer pgInfo =
 runServer :: IO ()
 runServer = do
   pgInfo <- fetchPostgresConnection
-  run 8000 (serve usersAPI (fullAPIServer pgInfo))
+  run 8000 $ cors policy $ serve usersAPI (fullAPIServer pgInfo)
+    where 
+      policy = const $ Just simpleCorsResourcePolicy 
+        { corsRequestHeaders = ["Content-Type"] }
 
 fetchUsersClient :: ClientM [Entity User]
 fetchUserClient :: Int64 -> ClientM User
