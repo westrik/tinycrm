@@ -44,6 +44,7 @@ runAction connectionString action =
 migrateDB :: PGInfo -> IO ()
 migrateDB connString = runAction connString (runMigration migrateAll)
 
+------------- USERS -------------
 fetchUserPG :: PGInfo -> Int64 -> IO (Maybe User)
 fetchUserPG connString uid = runAction connString (get (toSqlKey uid))
 
@@ -58,3 +59,7 @@ deleteUserPG connString uid = runAction connString (delete userKey)
   where
     userKey :: Key User
     userKey = toSqlKey uid
+
+------------- CASES -------------
+
+------------- QUEUES ------------
