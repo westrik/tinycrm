@@ -1,6 +1,8 @@
 module Main where
 
-import Database (localConnString, migrateDB)
+import Database (fetchPostgresConnection, migrateDB)
 
 main :: IO ()
-main = migrateDB localConnString
+main = do
+    connection <- fetchPostgresConnection
+    migrateDB connection
