@@ -3,11 +3,15 @@
 module Database where
 
 import           Control.Monad.Logger (runStdoutLoggingT, LoggingT, LogLevel(..), filterLogger)
-import           Control.Monad.Reader (runReaderT)
+import           Control.Monad.Reader (runReaderT, liftIO)
+import           Control.Monad (forM_)
 import           Data.Int (Int64)
-import           Data.ByteString.Char8 (pack)
-import           Database.Persist (get, insert, delete, selectList, Entity)
-import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import qualified Data.Text as Text
+import qualified Data.ByteString.Char8 as Char8
+import           Data.Maybe (listToMaybe)
+import           Database.Esqueleto (select, deleteCascade, from, where_, (^.), val, (==.), limit)
+import           Database.Persist (getBy, insert, selectList, Entity, Entity(..))
+import           Database.Persist.Sql (fromSqlKey)
 import           Database.Persist.Postgresql (ConnectionString, withPostgresqlConn, runMigration, 
                  SqlPersistT)
 import           System.Environment (lookupEnv)
@@ -31,7 +35,7 @@ fetchPostgresConnection :: IO PGInfo
 fetchPostgresConnection = do
   connString <- lookupEnv "CRM_DB"
   case connString of
-    Just string -> return (pack string)
+    Just string -> return (Char8.pack string)
     Nothing -> do
       logInfo "Falling back to local PG config"
       return localConnString
@@ -45,8 +49,8 @@ migrateDB :: PGInfo -> IO ()
 migrateDB connString = runAction connString (runMigration migrateAll)
 
 ------------- USERS -------------
-fetchUserPG :: PGInfo -> Int64 -> IO (Maybe User)
-fetchUserPG connString uid = runAction connString (get (toSqlKey uid))
+fetchUserPG :: PGInfo -> String -> IO (Maybe (Entity User))
+fetchUserPG connString login = runAction connString (getBy $ UniqueLogin (Text.pack login))
 
 fetchAllUsersPG :: PGInfo -> IO [Entity User]
 fetchAllUsersPG connString = runAction connString (selectList [] [])
@@ -54,11 +58,16 @@ fetchAllUsersPG connString = runAction connString (selectList [] [])
 createUserPG :: PGInfo -> User -> IO Int64
 createUserPG connString user = fromSqlKey <$> runAction connString (insert user)
 
-deleteUserPG :: PGInfo -> Int64 -> IO ()
-deleteUserPG connString uid = runAction connString (delete userKey)
+deleteUserPG :: PGInfo -> String -> IO ()
+deleteUserPG connString login = runAction connString deleteAction
   where
-    userKey :: Key User
-    userKey = toSqlKey uid
+    deleteAction :: SqlPersistT (LoggingT IO) ()
+    deleteAction = do
+      users <- select $
+        from $ \users -> do
+        where_ (users ^. UserLogin ==. val (Text.pack login))
+        pure users
+      forM_ users (deleteCascade . entityKey)
 
 ------------- CASES -------------
 

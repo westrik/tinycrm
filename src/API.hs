@@ -8,7 +8,7 @@ import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.Except (throwE)
 import           Data.Int (Int64)
 import           Data.Proxy (Proxy(..))
-import           Database.Persist (Entity)
+import           Database.Persist (Entity, Entity(..))
 import           Network.Wai.Handler.Warp (run)
 import           Network.Wai.Middleware.Cors
 import           Servant.API
@@ -21,8 +21,8 @@ import           Schema
 
 type FullAPI =
        "users" :> Get '[JSON] [Entity User]
-  :<|> "users" :> Capture "userid" Int64 :> Get '[JSON] User
-  :<|> "users" :> Capture "userid" Int64 :> Delete '[JSON] ()
+  :<|> "users" :> Capture "userid" String :> Get '[JSON] User
+  :<|> "users" :> Capture "userid" String :> Delete '[JSON] ()
   :<|> "users" :> ReqBody '[JSON] User :> Post '[JSON] Int64
 
 usersAPI :: Proxy FullAPI
@@ -31,18 +31,18 @@ usersAPI = Proxy :: Proxy FullAPI
 fetchUsersHandler :: PGInfo -> Handler [Entity User]
 fetchUsersHandler pgInfo = liftIO $ fetchAllUsersPG pgInfo
 
-fetchUserHandler :: PGInfo -> Int64 -> Handler User
-fetchUserHandler pgInfo uid = do
-  maybeUser <- liftIO $ fetchUserPG pgInfo uid
+fetchUserHandler :: PGInfo -> String -> Handler User
+fetchUserHandler pgInfo login = do
+  maybeUser <- liftIO $ fetchUserPG pgInfo login
   case maybeUser of
-    Just user -> return user
+    Just (Entity userId user) -> return user
     Nothing -> Handler $ (throwE $ err401 { errBody = "Could not find user with that ID" })
 
 createUserHandler :: PGInfo -> User -> Handler Int64
 createUserHandler pgInfo user = liftIO $ createUserPG pgInfo user
 
-deleteUserHandler :: PGInfo -> Int64 -> Handler ()
-deleteUserHandler pgInfo uid = liftIO $ deleteUserPG pgInfo uid
+deleteUserHandler :: PGInfo -> String -> Handler ()
+deleteUserHandler pgInfo login = liftIO $ deleteUserPG pgInfo login
 
 fullAPIServer :: PGInfo -> Server FullAPI
 fullAPIServer pgInfo =
@@ -60,8 +60,8 @@ runServer = do
         { corsRequestHeaders = ["Content-Type"] }
 
 fetchUsersClient :: ClientM [Entity User]
-fetchUserClient :: Int64 -> ClientM User
-deleteUserClient :: Int64 -> ClientM ()
+fetchUserClient :: String -> ClientM User
+deleteUserClient :: String -> ClientM ()
 createUserClient :: User -> ClientM Int64
 ( fetchUsersClient           :<|>
   fetchUserClient            :<|>

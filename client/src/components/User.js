@@ -3,14 +3,14 @@ import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
 
 const User = ({ user }) => {
-  const { login, avatarUrl, name } = user
+  console.log(user)
+  const { id, email, name } = user
 
   return (
     <div className="User">
-      <Link to={`/${login}`}>
-        <img src={avatarUrl} alt={login} width="72" height="72" />
+      <Link to={`/${id}`}>
         <h3>
-          {login} {name && <span>({name})</span>}
+          {email} {<span>({name})</span>}
         </h3>
       </Link>
     </div>
@@ -18,11 +18,9 @@ const User = ({ user }) => {
 }
 
 User.propTypes = {
-  user: PropTypes.shape({
-    login: PropTypes.string.isRequired,
-    avatarUrl: PropTypes.string.isRequired,
-    name: PropTypes.string
-  }).isRequired
+  id: PropTypes.string.isRequired,
+  email: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired
 }
 
 export default User

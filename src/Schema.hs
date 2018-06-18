@@ -15,14 +15,18 @@ import           Data.Aeson (ToJSON, toJSON, object, (.=), FromJSON, parseJSON, 
 import           Data.Aeson.Types (Parser, Pair)
 import           Database.Persist (Entity(..), Entity)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-import qualified Database.Persist.TH as PTH
+import           Database.Persist.TH
 import           Data.Text (Text)
 
-PTH.share [PTH.mkPersist PTH.sqlSettings, PTH.mkMigrate "migrateAll"] [PTH.persistLowerCase|
+share [mkPersist sqlSettings
+      , mkDeleteCascade sqlSettings
+      , mkMigrate "migrateAll"] [persistLowerCase|
   User sql=users
     name Text
+    login Text
     email Text
     UniqueEmail email
+    UniqueLogin login
     deriving Show Read Eq
 |]
 
@@ -52,7 +56,9 @@ parseUser :: Object -> Parser User
 parseUser o = do
   uName <- o .: "name"
   uEmail <- o .: "email"
+  uLogin <- o .: "login"
   return User
     { userName = uName
     , userEmail = uEmail
+    , userLogin = uLogin
     }
