@@ -3,7 +3,10 @@ import merge from 'lodash/merge'
 import { combineReducers } from 'redux'
 
 // Updates an entity cache in response to any action with response.entities.
-const entities = (state = { users: {} }, action) => {
+const entities = (state = { users: {}, repos: {} }, action) => {
+  console.log("ENTERING ACTION")
+  console.log(action)
+  console.log("LEAVING ACTION")
   if (action.response && action.response.entities) {
     return merge({}, state, action.response.entities)
   }
@@ -26,7 +29,7 @@ const errorMessage = (state = null, action) => {
 
 const rootReducer = combineReducers({
   entities,
-  errorMessage
+  errorMessage,
 })
 
 export default rootReducer

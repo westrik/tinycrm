@@ -7,7 +7,7 @@ import { withRouter } from 'react-router-dom'
 import { loadUser } from '../actions'
 import User from '../components/User'
 
-const loadData = ({ login, loadUser }) => {
+const loadData = ({ login, loadUser, loadStarred }) => {
   loadUser(login, [ 'name' ])
 }
 
@@ -28,9 +28,6 @@ class UserPage extends Component {
     }
   }
 
-  handleLoadMoreClick = () => {
-  }
-
   render() {
     const { user, login } = this.props
     if (!user) {
@@ -46,18 +43,18 @@ class UserPage extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
-  const login = ownProps.match.params.login
+  const login = ownProps.match.params.login.toLowerCase()
 
   const {
-    entities: { user }
+    entities: { users }
   } = state
 
   return {
     login,
-    user: user
+    user: users[login]
   }
 }
 
 export default withRouter(connect(mapStateToProps, {
-  loadUser,
+  loadUser
 })(UserPage))

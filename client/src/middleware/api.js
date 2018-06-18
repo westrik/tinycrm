@@ -1,9 +1,8 @@
-import { schema } from 'normalizr'
+import { normalize, schema } from 'normalizr'
+import { camelizeKeys } from 'humps'
 
 const API_ROOT = 'http://localhost:8000/'
 
-// Fetches an API response and normalizes the result JSON according to schema.
-// This makes every API response have the same shape, regardless of how nested it was.
 const callApi = (endpoint, schema) => {
   const fullUrl = (endpoint.indexOf(API_ROOT) === -1) ? API_ROOT + endpoint : endpoint
 
@@ -13,14 +12,20 @@ const callApi = (endpoint, schema) => {
         if (!response.ok) {
           return Promise.reject(json)
         }
-        return json
+
+        const camelizedJson = camelizeKeys(json)
+
+        return Object.assign({},
+          normalize(camelizedJson, schema),
+        )
       })
     )
 }
 
-const userSchema = new schema.Entity('users')
+const userSchema = new schema.Entity('users', {}, {
+  idAttribute: user => user.login.toLowerCase()
+})
 
-// Schemas for TinyCRM API responses.
 export const Schemas = {
   USER: userSchema,
   USER_ARRAY: [userSchema],

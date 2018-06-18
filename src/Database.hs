@@ -53,7 +53,9 @@ fetchUserPG :: PGInfo -> String -> IO (Maybe (Entity User))
 fetchUserPG connString login = runAction connString (getBy $ UniqueLogin (Text.pack login))
 
 fetchAllUsersPG :: PGInfo -> IO [Entity User]
-fetchAllUsersPG connString = runAction connString (selectList [] [])
+fetchAllUsersPG connString = do
+  logInfo "hello"
+  runAction connString (selectList [] [])
 
 createUserPG :: PGInfo -> User -> IO Int64
 createUserPG connString user = fromSqlKey <$> runAction connString (insert user)

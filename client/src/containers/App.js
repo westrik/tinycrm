@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom'
+import Explore from '../components/Explore'
 import { resetErrorMessage } from '../actions'
 
 class App extends Component {
@@ -11,6 +12,7 @@ class App extends Component {
     // Injected by React Redux
     errorMessage: PropTypes.string,
     resetErrorMessage: PropTypes.func.isRequired,
+    inputValue: PropTypes.string.isRequired,
     // Injected by React Router
     children: PropTypes.node
   }
@@ -42,9 +44,12 @@ class App extends Component {
   }
 
   render() {
-    const { children } = this.props
+    const { children, inputValue } = this.props
     return (
       <div>
+        <Explore value={inputValue}
+                 onChange={this.handleChange} />
+        <hr />
         {this.renderErrorMessage()}
         {children}
       </div>
@@ -53,7 +58,8 @@ class App extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => ({
-  errorMessage: state.errorMessage
+  errorMessage: state.errorMessage,
+  inputValue: ownProps.location.pathname.substring(1)
 })
 
 export default withRouter(connect(mapStateToProps, {
