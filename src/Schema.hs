@@ -41,6 +41,7 @@ userPairs :: User -> [Pair]
 userPairs user =
   [ "name" .= userName user
   , "email" .= userEmail user
+  , "login" .= userLogin user
   ]
 
 instance FromJSON (Entity User) where

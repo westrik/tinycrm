@@ -21,7 +21,7 @@ import           Schema
 
 type FullAPI =
        "users" :> Get '[JSON] [Entity User]
-  :<|> "users" :> Capture "userid" String :> Get '[JSON] User
+  :<|> "users" :> Capture "userid" String :> Get '[JSON] (Entity User)
   :<|> "users" :> Capture "userid" String :> Delete '[JSON] ()
   :<|> "users" :> ReqBody '[JSON] User :> Post '[JSON] Int64
 
@@ -31,11 +31,11 @@ usersAPI = Proxy :: Proxy FullAPI
 fetchUsersHandler :: PGInfo -> Handler [Entity User]
 fetchUsersHandler pgInfo = liftIO $ fetchAllUsersPG pgInfo
 
-fetchUserHandler :: PGInfo -> String -> Handler User
+fetchUserHandler :: PGInfo -> String -> Handler (Entity User)
 fetchUserHandler pgInfo login = do
   maybeUser <- liftIO $ fetchUserPG pgInfo login
   case maybeUser of
-    Just (Entity userId user) -> return user
+    Just user -> return user
     Nothing -> Handler $ (throwE $ err401 { errBody = "Could not find user with that ID" })
 
 createUserHandler :: PGInfo -> User -> Handler Int64
@@ -60,7 +60,7 @@ runServer = do
         { corsRequestHeaders = ["Content-Type"] }
 
 fetchUsersClient :: ClientM [Entity User]
-fetchUserClient :: String -> ClientM User
+fetchUserClient :: String -> ClientM (Entity User)
 deleteUserClient :: String -> ClientM ()
 createUserClient :: User -> ClientM Int64
 ( fetchUsersClient           :<|>
