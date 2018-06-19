@@ -11,7 +11,7 @@ const loadData = ({ login, loadUser, loadStarred }) => {
   loadUser(login, [ 'name' ])
 }
 
-class UserPage extends Component {
+class UserDetailPage extends Component {
   static propTypes = {
     login: PropTypes.string.isRequired,
     user: PropTypes.object,
@@ -57,4 +57,4 @@ const mapStateToProps = (state, ownProps) => {
 
 export default withRouter(connect(mapStateToProps, {
   loadUser
-})(UserPage))
+})(UserDetailPage))
