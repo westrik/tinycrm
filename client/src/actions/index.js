@@ -25,6 +25,12 @@ export const loadUser = (login, requiredFields = []) => (dispatch, getState) => 
   return dispatch(fetchUser(login))
 }
 
+// Fetches a list of all users from the TinyCRM API.
+// todo(westrik): implement
+export const loadUsers = () => (dispatch, getState) => {
+  return null
+}
+
 export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE'
 
 // Resets the currently visible error message.
